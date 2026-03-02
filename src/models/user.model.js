@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
+const bcrypt = require("bcryptjs")
 
 const userSchema = new mongoose.Schema({
     email:{
@@ -6,7 +7,7 @@ const userSchema = new mongoose.Schema({
         required:[true,"Please provide email adress."],
         trim:true,
         lowercase:true,
-        match:[/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/,"Invalid email adress"],
+        match:[/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,"Invalid email adress"],
         unique:[true,"Email adress already taken"],
     },
     name:{
@@ -26,12 +27,12 @@ const userSchema = new mongoose.Schema({
 userSchema.pre("save",async function(next){
 
     if(!this.isModified("password")){
-        return next();
+        return
     }
-    const hash = await bcrypt.hash(this.password,10)
+    const hash = await bcrypt.hash(this.password,6)
     this.password = hash;
 
-    return next()
+    return
 
 })
 userSchema.method.comparePassword = async function(password){
