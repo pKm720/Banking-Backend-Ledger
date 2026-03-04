@@ -1,5 +1,6 @@
 const models = require("../models/user.model")
 const jwt = require("jsonwebtoken")
+const emailService = require("../services/email.service")
 
 
 async function userRegisterController (req,res){
@@ -22,7 +23,9 @@ async function userRegisterController (req,res){
 
     res.cookie("token",token)
 
-    res.status(201).json({
+    await emailService.sendRegistrationEmail(user.email, user.name)
+
+    return res.status(201).json({
         user:{
             _id:user._id,
             email:user.email,
@@ -31,14 +34,11 @@ async function userRegisterController (req,res){
         token
     })
 }
+
+
+
 async function userLoginController(req,res) {
     const {email,password} = req.body
-
-    const isBlacklisted = await BlackList.findOne({ token })
-
-    if(isBlacklisted){
-        return res.status(401).json({ message: "Session expired, login again" })
-    }
 
     const user = await models.findOne({email}).select("+password")
     
@@ -58,7 +58,7 @@ async function userLoginController(req,res) {
 
     res.cookie("token",token)
 
-    res.status(200).json({
+    return res.status(200).json({
         user:{
             _id:user._id,
             email:user.email,
