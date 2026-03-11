@@ -16,6 +16,21 @@ async function accountCreation(req, res) {
 
 }
 
+async function getUserAccounts(req , res) {
+    const accounts = await acctMode.find({user: req.user._id});
+
+    res.status(200).json({
+        accounts
+    })
+}
+
+async function getAccountBalance(req, res) {
+    
+}
+
+
 module.exports = {
-    accountCreation
+    accountCreation,
+    getUserAccounts,
+    getAccountBalance
 }
