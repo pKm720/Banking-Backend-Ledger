@@ -27,12 +27,14 @@ async function creatTransAction(req,res) {
         })
     }
 
-    const isIdempotencyKeyAvailable = await transactionModel.findOne({
+
+
+    const isTransactionAlreadyExists = await transactionModel.findOne({
         idempotencyKey : idempotencyKey
     })
 
-    if(isIdempotencyKeyAvailable){
-        if(isIdempotencyKeyAvailable.status == "PENDING"){
+    if(isTransactionAlreadyExists){
+        if(isTransactionAlreadyExists.status == "PENDING"){
             return res.status(200).json({
                 message:"Transaction is being processed"
             })
@@ -55,6 +57,15 @@ async function creatTransAction(req,res) {
             })
         }
     }
+
+    if (fromUserAccount.status !== "ACTIVE" || toUserAccount.status !== "ACTIVE") {
+        return res.status(400).json({
+            message: "Both fromAccount and toAccount must be ACTIVE to process transaction"
+        })
+    }
+
+
+
 }
 
 async function createSystemTransaction(req, res) {
