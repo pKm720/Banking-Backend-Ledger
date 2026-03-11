@@ -27,8 +27,34 @@ async function creatTransAction(req,res) {
         })
     }
 
+    const isIdempotencyKeyAvailable = await transactionModel.findOne({
+        idempotencyKey : idempotencyKey
+    })
 
+    if(isIdempotencyKeyAvailable){
+        if(isIdempotencyKeyAvailable.status == "PENDING"){
+            return res.status(200).json({
+                message:"Transaction is being processed"
+            })
+        }
+        if (isTransactionAlreadyExists.status === "COMPLETED") {
+            return res.status(200).json({
+                message: "Transaction already processed",
+                transaction: isTransactionAlreadyExists
+            })
+        }
+        if (isTransactionAlreadyExists.status === "FAILED") {
+            return res.status(500).json({
+                message: "Transaction processing failed, please retry"
+            })
+        }
 
+        if (isTransactionAlreadyExists.status === "REVERSED") {
+            return res.status(500).json({
+                message: "Transaction was reversed, please retry"
+            })
+        }
+    }
 }
 
 async function createSystemTransaction(req, res) {
