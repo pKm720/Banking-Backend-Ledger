@@ -1,11 +1,82 @@
 const transactionModel = require("../models/transaction.model")
 const ledgerModel = require("../models/ledger.model")
+const accountModel = require("../models/accounts.model")
 const emailService = require("../services/email.service")
+const { default: mongoose } = require("mongoose")
 
 async function creatTransAction(req,res) {
     const {fromAccount, toAccount, amount , idempotencyKey} = req.body
 }
 
+async function createSystemTransaction(req, res) {
+    const {toAccount, amount, idempotencyKey} = req.body
+
+    if(!toAccount || !amount || !idempotencyKey) {
+        return res.status(400).json({
+            message: "toAccount, amount and idempotencyKey are required"
+        })
+    }
+    
+
+    const user = await accountModel.findOne({
+        _id:toAccount
+    })
+    if(!user){
+        res.status(400).json({
+            message:"User not found"
+        })
+    }
+
+    const fromUserAccount = await accountModel.findOne({
+        user: req.user._id
+    })
+
+    if(!fromUserAccount){
+        res.status(400).json({
+            message:"System account not found"
+        })
+    }
+
+    const session = await mongoose.startSession()
+    session.startTransaction()
+
+
+    const transaction = new transactionModel({
+        fromAccount: fromUserAccount._id,
+        toAccount,
+        amount,
+        idempotencyKey,
+        status: "PENDING"
+    })
+
+    const debitLedgerEntry = await ledgerModel.create([ {
+        account: fromUserAccount._id,
+        amount: amount,
+        transaction: transaction._id,
+        type: "DEBIT"
+    } ], { session })
+
+    const creditLedgerEntry = await ledgerModel.create([ {
+        account: toAccount,
+        amount: amount,
+        transaction: transaction._id,
+        type: "CREDIT"
+    } ], { session })
+
+    transaction.status = "COMPLETED"
+    await transaction.save({ session })
+
+    await session.commitTransaction()
+    session.endSession()
+
+    return res.status(201).json({
+        message: "Initial funds transaction completed successfully",
+        transaction: transaction
+    })
+
+}
+
 module.exports = {
-    creatTransAction
+    creatTransAction,
+    createSystemTransaction
 }

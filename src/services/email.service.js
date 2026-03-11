@@ -4,11 +4,8 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    type: 'OAuth2',
     user: process.env.EMAIL_USER,
-    clientId: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    refreshToken: process.env.REFRESH_TOKEN,
+    pass: process.env.APP_PASSWORD
   },
 });
 
@@ -33,8 +30,10 @@ const sendEmail = async (to, subject, text, html) => {
 
     console.log('Message sent: %s', info.messageId);
     console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    return { success: true, messageId: info.messageId }
   } catch (error) {
     console.error('Error sending email:', error);
+     return { success: false, error }
   }
 };
 async function sendRegistrationEmail(userEmail, name) {

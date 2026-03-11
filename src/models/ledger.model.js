@@ -9,7 +9,7 @@ const ledgerSchema = new moongoose.Schema({
         index: true,
         immutable: true
     },
-    ammount:{
+    amount:{
         type:Number,
         required:[true,"Ammount is required for entry in ledgery"],
         immutable: true
