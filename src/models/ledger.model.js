@@ -33,7 +33,7 @@ const ledgerModel = new moongoose.Schema({
 })
 
 
-function preventChnagesOnLedger() {
+function preventLedgerModification() {
     throw new Error("Ledger entries are immutable and cannot be modified or delete")
 }
 
