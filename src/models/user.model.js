@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
         select: true,
         minlength: [8,"Password should be 8 characters long"]
     },
-    systemUser:{
+    systemUser: {
         type: Boolean,
         default: false,
         immutable: true,

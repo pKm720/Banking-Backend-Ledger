@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const transactionModel = new mongoose.Schema({
+const transactionSchema = new mongoose.Schema({
     fromAccount: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "accounts",
@@ -37,6 +37,6 @@ const transactionModel = new mongoose.Schema({
     timestamps: true
 })
 
-const transaction = mongoose.model("transaction",transactionModel)
+const transactionModel = mongoose.model("transaction",transactionSchema)
 
-module.exports = transaction
+module.exports = transactionModel

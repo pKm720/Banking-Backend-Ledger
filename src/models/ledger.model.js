@@ -1,7 +1,7 @@
 const moongoose = require("mongoose")
-const transaction = require("./transaction.model")
+const transactionModel = require("./transaction.model")
 
-const ledgerModel = new moongoose.Schema({
+const ledgerSchema = new moongoose.Schema({
     account:{
         type: moongoose.Schema.Types.ObjectId,
         ref:"account",
@@ -46,6 +46,6 @@ ledgerSchema.pre('updateMany', preventLedgerModification);
 ledgerSchema.pre("findOneAndDelete", preventLedgerModification);
 ledgerSchema.pre("findOneAndReplace", preventLedgerModification);
 
-const ledgerSchema = moongoose.model("ledger",ledgerModel)
+const ledgerModel = moongoose.model("ledger",ledgerSchema)
 
 module.exports = ledgerModel
