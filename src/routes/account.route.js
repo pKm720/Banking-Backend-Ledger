@@ -7,7 +7,7 @@ const router = express.Router()
 
 router.post("/",acctMiddleware.verifyToken,acctController.accountCreation)
 router.get("/",acctMiddleware.verifyToken,acctController.getUserAccounts)
-router.get("/balance/:accountID",acctMiddleware.verifyToken,acctController.getAccountBalance)
+router.get("/balance/:accountId",acctMiddleware.verifyToken,acctController.getAccountBalance)
 
 
 module.exports = router

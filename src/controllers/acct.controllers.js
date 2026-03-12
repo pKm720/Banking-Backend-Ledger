@@ -1,4 +1,3 @@
-const accountModel = require("../models/accounts.model");
 const acctMode = require("../models/accounts.model")
 
 async function accountCreation(req, res) {
@@ -28,9 +27,15 @@ async function getUserAccounts(req , res) {
 async function getAccountBalance(req, res) {
     const { accountId } = req.params;
 
-    const account = await accountModel.findOne({
+    const account = await acctMode.findOne({
         _id: accountId
     })
+
+    if(account.user.toString() !== req.user._id.toString()){
+        return res.status(403).json({
+            message: "Unauthorized: This account does not belong to you"
+        })
+    }
 
     if(!account){
         return res.status(404).json({
@@ -38,7 +43,7 @@ async function getAccountBalance(req, res) {
         })
     }
 
-    const balance = await account.getAccountBalance();
+    const balance = await account.getBalance();
 
     res.status(200).json({
         accountId: account._id,

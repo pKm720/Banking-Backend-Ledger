@@ -21,13 +21,18 @@ async function creatTransAction(req,res) {
         _id: toAccount
     })
     
-    if(fromUserAccount || toUserAccount){
+    if(!fromUserAccount || !toUserAccount){
         return res.status(400).json({
             message: "fromAccount or toAccount donot exsit"
         })
     }
 
-
+    
+    if(fromUserAccount.user.toString() !== req.user._id.toString()){
+        return res.status(403).json({
+            message: "Unauthorized: This account does not belong to you"
+        })
+    }
 
     const isTransactionAlreadyExists = await transactionModel.findOne({
         idempotencyKey : idempotencyKey
