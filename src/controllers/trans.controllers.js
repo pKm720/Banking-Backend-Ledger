@@ -72,7 +72,46 @@ async function creatTransAction(req,res) {
         })
     }
 
+    let transaction;
+    try{
+
+        const session = await mongoose.startSession()
+        session.startTransaction()
+
+        transaction = (await transactionModel.create([{
+            fromAccount,
+            toAccount,
+            amount,
+            idempotencyKey,
+            status: "PENDING"
+        }],{session}))[0]
+
+        const debitLedgerEntry = await ledgerModel.create([{
+            account: fromAccount,
+            amount: amount,
+            transaction: transaction._id,
+            type: "DEBIT"
+        }],{session})
+
+        await (()=>{
+            return new Promise((resolve)=> setTimeout(resolve,15*1000));
+        })()
+
+        const creditLedgerEntry = await ledgerModel.create([{
+            account : toAccount,
+            amount: amount,
+            transaction: transaction._id,
+            type: "CREDIT"
+        }],{session})
+
+
+    }catch(error){
+        
+    }
 }
+
+
+
 
 async function createSystemTransaction(req, res) {
     const {toAccount, amount, idempotencyKey} = req.body
