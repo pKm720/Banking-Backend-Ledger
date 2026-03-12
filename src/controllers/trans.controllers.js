@@ -104,14 +104,26 @@ async function creatTransAction(req,res) {
             type: "CREDIT"
         }],{session})
 
+        await transactionModel.findOneAndUpdate(
+            {_id: transaction._id},
+            {status: "COMPLETED"},
+            {session}
+        )
 
+        await session.commitTransaction()
+        session.endSession()
     }catch(error){
-        
+        return res.status(400).json({
+            message: "Transaction is Pending due to some issue, please retry after sometime",
+        })
     }
+    await emailService.sendTransactionEmail(req.user.email, req.user.name, amount, toAccount)
+
+    return res.status(201).json({
+        message: "Transaction completed successfully",
+        transaction: transaction
+    })
 }
-
-
-
 
 async function createSystemTransaction(req, res) {
     const {toAccount, amount, idempotencyKey} = req.body
