@@ -144,7 +144,7 @@ async function createSystemTransaction(req, res) {
         _id:toAccount
     })
     if(!user){
-        res.status(400).json({
+        return res.status(400).json({
             message:"User not found"
         })
     }
@@ -154,43 +154,48 @@ async function createSystemTransaction(req, res) {
     })
 
     if(!fromUserAccount){
-        res.status(400).json({
+        return res.status(400).json({
             message:"System account not found"
         })
     }
 
-    const session = await mongoose.startSession()
-    session.startTransaction()
+    try{
+        const session = await mongoose.startSession()
+        session.startTransaction()
 
 
-    const transaction = new transactionModel({
-        fromAccount: fromUserAccount._id,
-        toAccount,
-        amount,
-        idempotencyKey,
-        status: "PENDING"
-    })
+        const transaction = new transactionModel({
+            fromAccount: fromUserAccount._id,
+            toAccount,
+            amount,
+            idempotencyKey,
+            status: "PENDING"
+        })
 
-    const debitLedgerEntry = await ledgerModel.create([ {
-        account: fromUserAccount._id,
-        amount: amount,
-        transaction: transaction._id,
-        type: "DEBIT"
-    } ], { session })
+        const debitLedgerEntry = await ledgerModel.create([ {
+            account: fromUserAccount._id,
+            amount: amount,
+            transaction: transaction._id,
+            type: "DEBIT"
+        } ], { session })
 
-    const creditLedgerEntry = await ledgerModel.create([ {
-        account: toAccount,
-        amount: amount,
-        transaction: transaction._id,
-        type: "CREDIT"
-    } ], { session })
+        const creditLedgerEntry = await ledgerModel.create([ {
+            account: toAccount,
+            amount: amount,
+            transaction: transaction._id,
+            type: "CREDIT"
+        } ], { session })
 
-    transaction.status = "COMPLETED"
-    await transaction.save({ session })
+        transaction.status = "COMPLETED"
+        await transaction.save({ session })
 
-    await session.commitTransaction()
-    session.endSession()
-
+        await session.commitTransaction()
+        session.endSession()
+    }catch(error){
+        return res.status(400).json({
+            message: "Transaction is Pending due to some issue, please retry after sometime"
+        })
+    }
     return res.status(201).json({
         message: "Initial funds transaction completed successfully",
         transaction: transaction
