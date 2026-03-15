@@ -13,10 +13,6 @@ const options = {
         url: "http://localhost:3000",
         description: "Development Server",
       },
-      {
-        url: "https://banking-backend-ledger.onrender.com",
-        description: "Production Server",
-      },
     ],
     components: {
       securitySchemes: {
