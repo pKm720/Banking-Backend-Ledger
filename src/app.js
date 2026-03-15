@@ -4,6 +4,8 @@ const authRouter = require("./routes/auth.route")
 const accountRouter = require("./routes/account.route")
 const transactionRouter = require("./routes/transaction.route")
 const rateLimit = require("express-rate-limit")
+const swaggerUi = require("swagger-ui-express")
+const swaggerSpec = require("./config/swagger")
 const app = express()
 const helmet = require("helmet")
 const morgan = require("morgan")
@@ -20,7 +22,20 @@ const limiter = rateLimit({
 app.use(helmet())
 app.use(morgan("dev"))
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+
+        const allowedOrigins = [
+            process.env.FRONTEND_URL || "http://localhost:3000",
+            "https://banking-backend-ledger.onrender.com"
+        ];
+
+        if (allowedOrigins.indexOf(origin) === -1) {
+            var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
     credentials: true
 }))
 app.use(express.json())
@@ -28,13 +43,15 @@ app.use(cookieParser())
 app.use(limiter)
 
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+
 app.get("/", (req, res) => {
     res.send("Ledger Service is up and running")
 })
 
-app.use("/api/auth",authRouter)
-app.use("/api/account",accountRouter)
-app.use("/api/transaction",transactionRouter)
+app.use("/api/auth", authRouter)
+app.use("/api/account", accountRouter)
+app.use("/api/transaction", transactionRouter)
 
 app.use((req, res) => {
     return res.status(404).json({
