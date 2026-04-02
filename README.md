@@ -113,13 +113,12 @@ To prevent accidental double-spending (e.g., if a user clicks "Send" twice), eve
 
 ## 👨‍💻 About the Author
 
-I am a passionate Backend Developer focused on building secure and high-performance financial systems. This project demonstrates my ability to handle complex database operations, implement security best practices, and deliver professional-grade documentation.
+I am a passionate Developer focused on building secure and high-performance financial systems. This project demonstrates my ability to handle complex database operations, implement security best practices, and deliver professional-grade documentation.
 
 **Looking for a dedicated developer for your team? Let's connect!**
 
 - **GitHub**: [pKm720](https://github.com/pKm720)
-- **LinkedIn**: [Priyanshu Mahato](https://linkedin.com/in/your-profile) *(Update with your actual link)*
-- **Portfolio**: [Visit My Work](https://your-portfolio.com) *(Update with your actual link)*
+- **LinkedIn**: [Priyanshu Mahato](https://www.linkedin.com/in/priyanshumahato/)
 
 ---
 *Created with ❤️ for a secure financial future.*
