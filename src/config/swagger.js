@@ -10,6 +10,10 @@ const options = {
     },
     servers: [
       {
+        url: "https://banking-backend-ledger.onrender.com",
+        description: "Production Server",
+      },
+      {
         url: "http://localhost:3000",
         description: "Development Server",
       },
