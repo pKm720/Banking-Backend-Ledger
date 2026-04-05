@@ -3,7 +3,7 @@ const router = express.Router()
 const authMiddleWare = require("../middlewares/auth.middleware")
 const transactionController = require("../controllers/trans.controllers")
 const validate = require("../middlewares/validate.middleware")
-const createTransactionSchema = require("../validators/transaction.validator")
+const { createTransactionSchema, createSystemTransactionSchema } = require("../validators/transaction.validator")
 
 /**
  * @swagger
@@ -42,7 +42,7 @@ const createTransactionSchema = require("../validators/transaction.validator")
  *       200:
  *         description: Transaction already processed or pending
  */
-router.post("/", authMiddleWare.verifyToken, validate(createTransactionSchema), transactionController.creatTransAction)
+router.post("/", authMiddleWare.verifyToken, validate(createTransactionSchema), transactionController.createTransaction)
 
 /**
  * @swagger
@@ -77,7 +77,7 @@ router.post("/", authMiddleWare.verifyToken, validate(createTransactionSchema), 
  *         description: Account not found or missing fields
  */
 
-router.post("/system/initial-funds", authMiddleWare.authSystemMiddleware, transactionController.createSystemTransaction)
+router.post("/system/initial-funds", authMiddleWare.authSystemMiddleware, validate(createSystemTransactionSchema), transactionController.createSystemTransaction)
 
 
 module.exports = router
