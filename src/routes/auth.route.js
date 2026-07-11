@@ -42,7 +42,7 @@ const limiter = rateLimit({
  *         description: User email already exists
  */
 
-router.post("/register",authController.userRegisterController)
+router.post("/register", authController.userRegisterController)
 
 /**
  * @swagger
@@ -70,7 +70,7 @@ router.post("/register",authController.userRegisterController)
  *       401:
  *         description: Invalid credentials
  */
-router.post("/login",limiter,authController.userLoginController)
+router.post("/login", limiter, authController.userLoginController)
 
 /**
  * @swagger
