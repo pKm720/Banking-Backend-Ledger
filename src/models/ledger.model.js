@@ -1,51 +1,27 @@
-const moongoose = require("mongoose")
-const transactionModel = require("./transaction.model")
-
-const ledgerSchema = new moongoose.Schema({
-    account:{
-        type: moongoose.Schema.Types.ObjectId,
-        ref:"account",
-        required: [true,"Ledger must be associated with an account"],
-        index: true,
-        immutable: true
-    },
-    amount:{
-        type:Number,
-        required:[true,"Ammount is required for entry in ledgery"],
-        immutable: true
-    },
-    transaction:{
-        type: moongoose.Schema.Types.ObjectId,
-        ref: "transaction",
-        required: [true,"A transaction must occur for entry in ledger"],
-        index: true,
-        immutable: true,
-    },
-    type:{
-        type: String,
-        enum: {
-            values:["CREDIT","DEBIT"],
-            message: "Type can be either be nDREDIT or DEBIT"
-        },
-        required: [true,"Ledger type is required"],
-        immutable: true
-    }
-})
-
-
-function preventLedgerModification() {
-    throw new Error("Ledger entries are immutable and cannot be modified or delete")
+const { db } = require("../config/db");
+const TABLE = "ledger_entries";
+/**
+ * Create a single ledger entry.
+ * Always call this within a database transaction (pass trx).
+ */
+async function createEntry({ account_id, transaction_id, amount, type }, trx) {
+    const query = trx ? trx(TABLE) : db(TABLE);
+    const [entry] = await query
+        .insert({ account_id, transaction_id, amount, type })
+        .returning(["id", "account_id", "transaction_id", "amount", "type",
+            "created_at"]);
+    return entry;
 }
-
-ledgerSchema.pre('findOneAndUpdate', preventLedgerModification);
-ledgerSchema.pre('updateOne', preventLedgerModification);
-ledgerSchema.pre('deleteOne', preventLedgerModification);
-ledgerSchema.pre('remove', preventLedgerModification);
-ledgerSchema.pre('deleteMany', preventLedgerModification);
-ledgerSchema.pre('updateMany', preventLedgerModification);
-ledgerSchema.pre("findOneAndDelete", preventLedgerModification);
-ledgerSchema.pre("findOneAndReplace", preventLedgerModification);
-
-const ledgerModel = moongoose.model("ledger",ledgerSchema)
-
-module.exports = ledgerModel
+/**
+ * Create multiple ledger entries at once.
+ * Always call this within a database transaction (pass trx).
+ */
+async function createEntries(entries, trx) {
+    const query = trx ? trx(TABLE) : db(TABLE);
+    return query.insert(entries).returning(["id", "account_id",
+        "transaction_id", "amount", "type", "created_at"]);
+}
+module.exports = {
+    createEntry,
+    createEntries,
+};

@@ -1,7 +1,7 @@
 const acctMode = require("../models/accounts.model")
 
 async function accountCreation(req, res) {
-    try{
+    try {
         const user = req.user;
         const account = await acctMode.create({
             user: user._id
@@ -12,14 +12,14 @@ async function accountCreation(req, res) {
                 account
             }
         )
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({ message: "Something went wrong" })
     }
 
 }
 
-async function getUserAccounts(req , res) {
-    const accounts = await acctMode.find({user: req.user._id});
+async function getUserAccounts(req, res) {
+    const accounts = await acctMode.find({ user: req.user._id });
 
     return res.status(200).json({
         accounts
@@ -27,19 +27,19 @@ async function getUserAccounts(req , res) {
 }
 
 async function getAccountBalance(req, res) {
-    try{
+    try {
         const { accountId } = req.params;
         const account = await acctMode.findOne({
             _id: accountId
         })
 
-        if(!account){
+        if (!account) {
             return res.status(404).json({
                 message: "Account not found"
             })
         }
 
-        if(account.user.toString() !== req.user._id.toString()){
+        if (account.user.toString() !== req.user._id.toString()) {
             return res.status(403).json({
                 message: "Unauthorized: This account does not belong to you"
             })
@@ -51,7 +51,7 @@ async function getAccountBalance(req, res) {
             accountId: account._id,
             balance: balance
         })
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({ message: "Something went wrong" })
     }
 }

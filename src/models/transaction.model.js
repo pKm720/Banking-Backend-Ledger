@@ -1,42 +1,48 @@
-const mongoose = require("mongoose");
-
-const transactionSchema = new mongoose.Schema({
-    fromAccount: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "accounts",
-        required: [true,"Transaction must be linked to a From account"],
-        index: true
-    },
-    toAccount: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "accounts",
-        required: [true,"Transaction must be linked to a To account"],
-        index: true
-    },
-    status: {
-        type: String,
-        enum :{
-            values: ["PENDING","COMPLETED","FAILED","REVERSED"],
-            message: ["The transaction staus can only be  PENDING,COMPLETED,FAILED,REVERSED"]
-        },
-        default: "PENDING"
-
-    },
-    amount: {
-        type:Number,
-        required: [true,"Amount is required to create a transaction"],
-        min:[0,"The transaction ammount can't be negative"]
-    },
-    idempotencyKey: {
-        type:String,
-        required :[true,"idempotency Key is required for a transaction"],
-        index: true,
-        unique: true
-    }
-},{
-    timestamps: true
-})
-
-const transactionModel = mongoose.model("transaction",transactionSchema)
-
-module.exports = transactionModel
+const { db } = require("../config/db");
+const TABLE = "transactions";
+/**
+ * Create a new transaction record.
+ * Pass trx to run this inside a database transaction.
+ */
+async function createTransaction({ from_account_id, to_account_id, amount,
+    idempotency_key, status = "PENDING" }, trx) {
+    const query = trx ? trx(TABLE) : db(TABLE);
+    const [transaction] = await query
+        .insert({
+            from_account_id, to_account_id, amount, idempotency_key,
+            status
+        })
+        .returning(["id", "from_account_id", "to_account_id", "amount",
+            "status", "idempotency_key", "created_at", "updated_at"]);
+    return transaction;
+}
+/**
+ * Find a transaction by its idempotency key (for duplicate detection).
+ */
+async function findByIdempotencyKey(idempotency_key) {
+    return db(TABLE).where({ idempotency_key }).first();
+}
+/**
+ * Update a transaction's status.
+ * Pass trx to run this inside a database transaction.
+ */
+async function updateStatus(id, status, trx) {
+    const query = trx ? trx(TABLE) : db(TABLE);
+    const [updated] = await query
+        .where({ id })
+        .update({ status, updated_at: db.raw("NOW()") })
+        .returning(["id", "status", "updated_at"]);
+    return updated;
+}
+/**
+ * Find a transaction by its ID.
+ */
+async function findById(id) {
+    return db(TABLE).where({ id }).first();
+}
+module.exports = {
+    createTransaction,
+    findByIdempotencyKey,
+    updateStatus,
+    findById,
+};
