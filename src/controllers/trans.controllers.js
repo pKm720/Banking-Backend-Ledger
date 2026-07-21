@@ -110,7 +110,7 @@ async function createTransaction(req, res) {
             message: "Transaction failed due to an internal error, please retry later",
         })
     }
-    
+
     // Send email outside the session for performance
     emailService.sendTransactionEmail(req.user.email, req.user.name, amount, toAccount).catch(err => {
         console.error("Email service error:", err)
@@ -130,7 +130,7 @@ async function createSystemTransaction(req, res) {
     const toUserAccount = await accountModel.findOne({
         _id: toAccount
     })
-    
+
     if (!toUserAccount) {
         return res.status(400).json({
             message: "Destination account not found"
@@ -184,7 +184,7 @@ async function createSystemTransaction(req, res) {
             message: "System transaction failed due to an internal error"
         })
     }
-    
+
     return res.status(201).json({
         message: "Initial funds transaction completed successfully",
         transaction: transaction
